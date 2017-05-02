@@ -1,98 +1,78 @@
-#include <Servo.h> 
-  // HI
-Servo leftMotor;
-Servo rightMotor;
+#include <Servo.h>
+// HI
+Servo leftBrake;
+Servo rightBrake;
+Servo steering;
+Servo throttle;     ////////Is this a servo???
+
+const int LEFT_BRAKE_MOTOR = 8;
+const int RIGHT_BRAKE_MOTOR = 11;
+const int THROTTLE_MOTOR = 10;  ////////Will change once we wire///////
+const int STEERING_SERVO = 9;
 
 
-const int RED_LED = 11;
-const int GREEN_LED = 12;
-
-const int BUTTON = A5;             
-
-
-const int MOTOR_PIN_LEFT = 8;
-const int MOTOR_PIN_RIGHT = 11;
-
-
-const int MOTOR_VALUE_MIN = 50;
-const int MOTOR_VALUE_MAX = 130;
-const int MOTOR_VALUE_STOP = 90;
+const int MOTOR_VALUE_OFF = 0;        ////////Test to make sure these values 
+const int MOTOR_VALUE_MAX = 179;      /////// will work (These are assuming 0
+const int MOTOR_VALUE_CENTER = 90;    /////// is no brakes and 179 is full brakes)
 
 const int NUMBER_OF_BYTES_IN_A_COMMAND = 4;
-const int SERIAL_COMMAND_SET_LEFT_MOTOR = 254;
-const int SERIAL_COMMAND_SET_RIGHT_MOTOR = 255;
+const int SERIAL_COMMAND_SET_THROTTLE_MOTOR = 254;
+const int SERIAL_COMMAND_SET_STEERING_MOTOR = 255;
+const int SERIAL_COMMAND_SET_LEFT_BRAKE = 253;
+const int SERIAL_COMMAND_SET_RIGHT_BRAKE = 252;
 
 const long SERIAL_DATA_SPEED_38400_BPS = 38400;
 
-int leftMotorVal;
-int rightMotorVal;
-
- boolean turnOnOff = 0;
- int valButton;
- 
- void setup()
+void setup()
 {
-    Serial.begin(SERIAL_DATA_SPEED_38400_BPS);
-    
-    
-    pinMode(RED_LED,OUTPUT);            
-    pinMode(GREEN_LED,OUTPUT);
-    
-    
-    leftMotor.attach (MOTOR_PIN_LEFT);
-    leftMotor.write(MOTOR_VALUE_STOP);
-    
-   
-    rightMotor.attach(MOTOR_PIN_RIGHT);
-    rightMotor.write(MOTOR_VALUE_STOP);
-    
-    
+  Serial.begin(SERIAL_DATA_SPEED_38400_BPS);
+
+  leftBrake.attach (LEFT_BRAKE_MOTOR);
+  leftBrake.write(MOTOR_VALUE_OFF);
+
+  rightBrake.attach(RIGHT_BRAKE_MOTOR);
+  rightBrake.write(MOTOR_VALUE_OFF);
+
+  throttle.attach(THROTTLE_MOTOR);
+  throttle.write(MOTOR_VALUE_OFF);
+
+  steering.attach(STEERING_SERVO);
+  steering.write(MOTOR_VALUE_CENTER);
 }
 
 void loop()
 {
-  static char rightMotor = 0;
-  static char leftMotor = 0;
+  static char rightBrakeVal = 0;
+  static char leftBrakeVal = 0;
+  static char throttleVal = 0;
+  static char steeringVal = 90;
   //Serial.println( Serial.available());
   if (Serial.available() > NUMBER_OF_BYTES_IN_A_COMMAND)
   {
-    int incomingByte = Serial.read(); 
+    int incomingByte = Serial.read();
     Serial.println( incomingByte);
-    if(SERIAL_COMMAND_SET_LEFT_MOTOR == incomingByte)
+    if (SERIAL_COMMAND_SET_LEFT_BRAKE == incomingByte)
     {
-      leftMotor = Serial.read();
+      leftBrakeVal = Serial.read();
+      
     }
-    if(SERIAL_COMMAND_SET_RIGHT_MOTOR == incomingByte)
+    if (SERIAL_COMMAND_SET_RIGHT_BRAKE == incomingByte)
     {
-      rightMotor = Serial.read();
+      rightBrakeVal = Serial.read();
     }
-   }
-   motor_setValues(leftMotor,rightMotor);
+    if (SERIAL_COMMAND_SET_THROTTLE_MOTOR == incomingByte)
+    {
+      throttleVal = Serial.read();
+    }    
+    if (SERIAL_COMMAND_SET_STEERING_MOTOR == incomingByte)
+    {
+      steeringVal = Serial.read();
+    }
+    leftBrake.write(leftBrakeVal);
+    rightBrake.write(rightBrakeVal);
+    throttle.write(throttleVal);
+    steering.write(steeringVal);
+  }
 }
-//************************ Subroutines ****************************
 
 
-void motor_setValues (int normalizedLeft, int normalizedRight)
-{
-  if (normalizedLeft == 0)
-  {
-    leftMotorVal = MOTOR_VALUE_STOP;
-  }
-  else
-  {
-     leftMotorVal = map(normalizedLeft,-100,100,MOTOR_VALUE_MIN,MOTOR_VALUE_MAX);
-  }
-  
-   if (normalizedRight == 0)
-  {
-     rightMotorVal = MOTOR_VALUE_STOP;
-  }
-  else
-  {
-     rightMotorVal = map(normalizedRight,-100,100,MOTOR_VALUE_MIN,MOTOR_VALUE_MAX);
-  }
-  
-  leftMotor.write(leftMotorVal);
-  rightMotor.write(rightMotorVal);
-}
-  
