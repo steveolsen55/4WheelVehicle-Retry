@@ -21,7 +21,7 @@ const int SERIAL_COMMAND_SET_STEERING_MOTOR = 255;
 const int SERIAL_COMMAND_SET_LEFT_BRAKE = 253;
 const int SERIAL_COMMAND_SET_RIGHT_BRAKE = 252;
 
-const long SERIAL_DATA_SPEED_38400_BPS = 38400;
+const long SERIAL_DATA_SPEED_38400_BPS = 9600;
 
 void setup()
 {
@@ -46,41 +46,54 @@ void loop()
   static char leftBrakeVal = 0;
   static char throttleVal = 0;
   static char steeringVal = 90;
-  Serial.println( Serial.available());
+//  Serial.print( "Serial.available()= ");
+//  Serial.println(Serial.available(),DEC);
   if (Serial.available() > NUMBER_OF_BYTES_IN_A_COMMAND)
   {
     int incomingByte = Serial.read();
-//    Serial.print( incomingByte);
-    Serial.println("a");
+    
+   // Serial.println("a");
     if (SERIAL_COMMAND_SET_LEFT_BRAKE == incomingByte)
     {
       leftBrakeVal = Serial.read();
 //      Serial.print(leftBrakeVal);
-Serial.println("b");
+//Serial.println("b");
     }
     if (SERIAL_COMMAND_SET_RIGHT_BRAKE == incomingByte)
     {
       rightBrakeVal = Serial.read();
 //      Serial.print(rightBrakeVal);
-      Serial.println("c");
+    //  Serial.println("c");
+    }
+    if (SERIAL_COMMAND_SET_STEERING_MOTOR == incomingByte)
+    {
+      steeringVal = Serial.read();
+     // Serial.println(steeringVal);
+    //  Serial.println("e");
     }
     if (SERIAL_COMMAND_SET_THROTTLE_MOTOR == incomingByte)
     {
       throttleVal = Serial.read();
 //      Serial.print(throttleVal);
-      Serial.println("d");
-    }    
-    if (SERIAL_COMMAND_SET_STEERING_MOTOR == incomingByte)
-    {
-      steeringVal = Serial.read();
-      Serial.println(steeringVal);
-      Serial.println("e");
-    }
-    leftBrake.write(map(leftBrakeVal,0,100,0,179));
-    rightBrake.write(map(rightBrakeVal,0,100,0,179));
-    throttle.write(throttleVal);
-    steering.write(map(steeringVal,0,100,0,179));
-  }
+   //   Serial.println("d");
+    } 
+    while(Serial.available())
+    Serial.read();   
+   }  
+    Serial.print(leftBrakeVal,DEC);
+    Serial.print("\t");
+    Serial.print(rightBrakeVal,DEC);
+    Serial.print("\t");
+    Serial.print(steeringVal,DEC);
+    Serial.print("\t");
+    Serial.println(throttleVal,DEC);
+    
+   
+//    leftBrake.write(map(leftBrakeVal,0,100,0,179));
+//    rightBrake.write(map(rightBrakeVal,0,100,0,179));
+//    throttle.write(throttleVal);
+//    steering.write(map(steeringVal,0,100,0,179));
+  
 }
 
 

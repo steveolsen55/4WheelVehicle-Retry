@@ -21,7 +21,7 @@ const int SERIAL_COMMAND_SET_LEFT_BRAKE = 253;
 const int SERIAL_COMMAND_SET_RIGHT_BRAKE = 252;
 
 const unsigned long TIME_BETWEEN_GET_DATA = 50;
-const long SERIAL_DATA_SPEED_38400_BPS = 38400;
+const long SERIAL_DATA_SPEED_38400_BPS = 9600;
 
 int JOYSTICK_STEERING = A2;
 int JOYSTICK_THROTTLE = A3;
@@ -109,21 +109,25 @@ void SendNewMotorValues(char thrust, char turn, char leftBrake, char rightBrake)
 
   Serial.write (SERIAL_COMMAND_SET_RIGHT_BRAKE);
   Serial.write (rightBrake);
-  Serial.write (SERIAL_COMMAND_SET_THROTTLE_MOTOR);
-  Serial.write (thrust);
 
   Serial.write (SERIAL_COMMAND_SET_STEERING_MOTOR);
   Serial.write (turn);
 
+  Serial.write (SERIAL_COMMAND_SET_THROTTLE_MOTOR);
+  Serial.write (thrust);
 
 
-//  Serial.print(thrust, DEC);
+
+//  Serial.print(leftBrake, DEC);
+//  Serial.print("   ");
+//  Serial.print(rightBrake, DEC);
 //  Serial.print("   ");
 //  Serial.print(turn, DEC);
 //  Serial.print("   ");
-//  Serial.print(leftBrake, DEC);
-//  Serial.print("   ");
-//  Serial.println(rightBrake, DEC);
+//  Serial.println(thrust, DEC);
+  
+  
+  
 }
 
 
