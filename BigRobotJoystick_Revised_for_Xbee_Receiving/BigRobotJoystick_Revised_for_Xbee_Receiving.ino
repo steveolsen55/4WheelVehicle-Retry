@@ -3,7 +3,7 @@
 Servo leftBrake;
 Servo rightBrake;
 Servo steering;
-Servo throttle;     ////////Is this a servo???
+Servo throttle;
 
 const int LEFT_BRAKE_MOTOR = 8;
 const int RIGHT_BRAKE_MOTOR = 11;
@@ -11,9 +11,9 @@ const int THROTTLE_MOTOR = 5;  ////////Will change once we wire///////
 const int STEERING_SERVO = 6;
 
 
-const int MOTOR_VALUE_OFF = 0;        ////////Test to make sure these values 
-const int MOTOR_VALUE_MAX = 179;      /////// will work (These are assuming 0
-const int MOTOR_VALUE_CENTER = 90;    /////// is no brakes and 179 is full brakes)
+const int MOTOR_VALUE_OFF = 0;
+const int MOTOR_VALUE_MAX = 179;
+const int MOTOR_VALUE_CENTER = 90;
 
 const int NUMBER_OF_BYTES_IN_A_COMMAND = 8;
 const int SERIAL_COMMAND_SET_THROTTLE_MOTOR = 254;
@@ -21,10 +21,14 @@ const int SERIAL_COMMAND_SET_STEERING_MOTOR = 255;
 const int SERIAL_COMMAND_SET_LEFT_BRAKE = 253;
 const int SERIAL_COMMAND_SET_RIGHT_BRAKE = 252;
 
-const long SERIAL_DATA_SPEED_38400_BPS = 9600;
+const long SERIAL_DATA_SPEED_9600_BPS = 9600;
+const unsigned long MAX_TIMEOUT = 250;
+unsigned long previousTime;
+
 
 void setup()
 {
+  previousTime = millis();
   Serial.begin(SERIAL_DATA_SPEED_38400_BPS);
 
   leftBrake.attach (LEFT_BRAKE_MOTOR);
@@ -46,54 +50,48 @@ void loop()
   static char leftBrakeVal = 0;
   static char throttleVal = 0;
   static char steeringVal = 90;
-//  Serial.print( "Serial.available()= ");
-//  Serial.println(Serial.available(),DEC);
+
+  Serial.println(Serial.available());
+
   if (Serial.available() > NUMBER_OF_BYTES_IN_A_COMMAND)
   {
+
     int incomingByte = Serial.read();
-    
-   // Serial.println("a");
     if (SERIAL_COMMAND_SET_LEFT_BRAKE == incomingByte)
     {
       leftBrakeVal = Serial.read();
-//      Serial.print(leftBrakeVal);
-//Serial.println("b");
+      previousTime = millis();
     }
-    if (SERIAL_COMMAND_SET_RIGHT_BRAKE == incomingByte)
+    else if (SERIAL_COMMAND_SET_RIGHT_BRAKE == incomingByte)
     {
       rightBrakeVal = Serial.read();
-//      Serial.print(rightBrakeVal);
-    //  Serial.println("c");
+      previousTime = millis();
     }
-    if (SERIAL_COMMAND_SET_STEERING_MOTOR == incomingByte)
+    else if (SERIAL_COMMAND_SET_STEERING_MOTOR == incomingByte)
     {
       steeringVal = Serial.read();
-     // Serial.println(steeringVal);
-    //  Serial.println("e");
+      previousTime = millis();
     }
-    if (SERIAL_COMMAND_SET_THROTTLE_MOTOR == incomingByte)
+    else if (SERIAL_COMMAND_SET_THROTTLE_MOTOR == incomingByte)
     {
       throttleVal = Serial.read();
-//      Serial.print(throttleVal);
-   //   Serial.println("d");
-    } 
-    while(Serial.available())
-    Serial.read();   
-   }  
-    Serial.print(leftBrakeVal,DEC);
-    Serial.print("\t");
-    Serial.print(rightBrakeVal,DEC);
-    Serial.print("\t");
-    Serial.print(steeringVal,DEC);
-    Serial.print("\t");
-    Serial.println(throttleVal,DEC);
-    
-   
-//    leftBrake.write(map(leftBrakeVal,0,100,0,179));
-//    rightBrake.write(map(rightBrakeVal,0,100,0,179));
-//    throttle.write(throttleVal);
-//    steering.write(map(steeringVal,0,100,0,179));
-  
+      previousTime = millis();
+    }
+
+
+    if (Serial.available() < NUMBER_OF_BYTES_IN_COMMAND && millis() == MAX_TIMEOUT) {
+      throttle.write(MOTOR_VALUE_OFF);
+      leftBrake.write(MOTOR_VALUE_MAX);
+      rightBrake.write(MOTOR_VALUE_MAX);
+      steering.write(MOTOR_VALUE_CENTER);
+    }
+  }
+
+  leftBrake.write(map(leftBrakeVal, 0, 100, 0, 179));
+  rightBrake.write(map(rightBrakeVal, 0, 100, 0, 179));
+  throttle.write(throttleVal);
+  steering.write(map(steeringVal, 0, 100, 0, 179));
+
 }
 
 
