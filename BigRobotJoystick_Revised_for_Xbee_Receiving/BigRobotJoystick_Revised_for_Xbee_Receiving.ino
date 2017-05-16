@@ -20,6 +20,7 @@ const int SERIAL_COMMAND_SET_THROTTLE_MOTOR = 254;
 const int SERIAL_COMMAND_SET_STEERING_MOTOR = 255;
 const int SERIAL_COMMAND_SET_LEFT_BRAKE = 253;
 const int SERIAL_COMMAND_SET_RIGHT_BRAKE = 252;
+const int SERIAL_COMMAND_RECEIVED = 250;
 
 const long SERIAL_DATA_SPEED_9600_BPS = 9600;
 const unsigned long MAX_TIMEOUT = 250;
@@ -60,21 +61,26 @@ void loop()
     if (SERIAL_COMMAND_SET_LEFT_BRAKE == incomingByte)
     {
       leftBrakeVal = Serial.read();
+      Serial.write(SERIAL_COMMAND_RECEIVED);
       previousTime = millis();
+      
     }
     else if (SERIAL_COMMAND_SET_RIGHT_BRAKE == incomingByte)
     {
       rightBrakeVal = Serial.read();
+      Serial.write(SERIAL_COMMAND_RECEIVED);
       previousTime = millis();
     }
     else if (SERIAL_COMMAND_SET_STEERING_MOTOR == incomingByte)
     {
       steeringVal = Serial.read();
+      Serial.write(SERIAL_COMMAND_RECEIVED);      
       previousTime = millis();
     }
     else if (SERIAL_COMMAND_SET_THROTTLE_MOTOR == incomingByte)
     {
       throttleVal = Serial.read();
+      Serial.write(SERIAL_COMMAND_RECEIVED);      
       previousTime = millis();
     }
 
