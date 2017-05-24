@@ -1,15 +1,14 @@
 #include <Servo.h>
-// HI
+
 Servo leftBrake;
 Servo rightBrake;
 Servo steering;
 Servo throttle;
 
-const int LEFT_BRAKE_MOTOR = 7;
-const int RIGHT_BRAKE_MOTOR = 6;
-const int THROTTLE_MOTOR = 10;  ////////Will change once we wire///////
-const int STEERING_SERVO = 8;
-
+const int LEFT_BRAKE_MOTOR = 10;
+const int RIGHT_BRAKE_MOTOR = 8;
+const int THROTTLE_MOTOR = 7;  
+const int STEERING_SERVO = 6;
 
 const int MOTOR_VALUE_OFF = 0;
 const int MOTOR_VALUE_MAX = 179;
@@ -25,7 +24,6 @@ const int SERIAL_COMMAND_RECEIVED = 250;
 const long SERIAL_DATA_SPEED_9600_BPS = 9600;
 const unsigned long MAX_TIMEOUT = 250;
 unsigned long previousTime;
-
 
 void setup()
 {
@@ -52,12 +50,10 @@ void loop()
   static char throttleVal = 0;
   static char steeringVal = 50;
 
-  Serial.println(Serial.available());
-
-  if (Serial.available() > NUMBER_OF_BYTES_IN_A_COMMAND)
+  if (Serial.available() >= NUMBER_OF_BYTES_IN_A_COMMAND)
   {
-
     int incomingByte = Serial.read();
+    
     if (SERIAL_COMMAND_SET_LEFT_BRAKE == incomingByte)
     {
       leftBrakeVal = Serial.read();
@@ -84,20 +80,17 @@ void loop()
     }
   }
 
-  //Incase of loss of xbee communication
-//  else if (millis() - previousTime >= MAX_TIMEOUT)
-//  {
-//    throttle.write(MOTOR_VALUE_OFF);
-//    leftBrake.write(MOTOR_VALUE_MAX);
-//    rightBrake.write(MOTOR_VALUE_MAX);
-//    steering.write(MOTOR_VALUE_CENTER);
-//  }
+  //If no new signals recieved for 5 cycles of reading
+  if (millis() - previousTime >= MAX_TIMEOUT)
+  {
+    throttle.write(MOTOR_VALUE_OFF);
+    leftBrake.write(MOTOR_VALUE_MAX);
+    rightBrake.write(MOTOR_VALUE_MAX);
+    steering.write(MOTOR_VALUE_CENTER);
+  }
 
   leftBrake.write(map(leftBrakeVal, 0, 100, 0, 179));
   rightBrake.write(map(rightBrakeVal, 0, 100, 0, 179));
   throttle.write(throttleVal);
-  steering.write(map(steeringVal, 0, 100, 0, 179));
-
+  steering.write(map(steeringVal, 0, 100, 130, 60));
 }
-
-
