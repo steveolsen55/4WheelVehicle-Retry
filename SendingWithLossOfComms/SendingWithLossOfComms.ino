@@ -1,7 +1,6 @@
 const int SERIAL_COMMAND_SET_THROTTLE_MOTOR = 254;
 const int SERIAL_COMMAND_SET_STEERING_MOTOR = 255;
-const int SERIAL_COMMAND_SET_LEFT_BRAKE = 253;
-const int SERIAL_COMMAND_SET_RIGHT_BRAKE = 252;
+const int SERIAL_COMMAND_SET_BRAKE = 253;
 const int SERIAL_COMMAND_RECEIVED = 250;
 
 const int NUMBER_OF_BYTES_IN_A_COMMAND = 1;
@@ -17,13 +16,12 @@ int COMS_BAD_LED = 12;       //Red
 
 int JOYSTICK_STEERING = A2;
 int JOYSTICK_THROTTLE = A3;
-int LEFT_BRAKE = A0;
-int RIGHT_BRAKE = A1;
 
 int throttleVal;
 int steeringVal;
 int leftBrakeVal;
 int rightBrakeVal;
+int brakeVal;
 
 unsigned long previousTime;
 unsigned long commTime;
@@ -50,8 +48,8 @@ void loop()
 
   int throttleVal = 0;
   int steeringVal = 0;
-  int leftBrakeVal = 0;
-  int rightBrakeVal = 0;
+  int brakeVal = 0;
+  int throttleReading = 0;
 
   if (Serial.available() > NUMBER_OF_BYTES_IN_A_COMMAND)
   { //// When xbees are communicating
@@ -68,29 +66,33 @@ void loop()
 
   if (millis() - previousTime >= TIME_BETWEEN_GET_DATA)
   {
-    throttleVal = analogRead(JOYSTICK_THROTTLE);
+    throttleReading = analogRead(JOYSTICK_THROTTLE);
     delayMicroseconds(20);
     steeringVal = analogRead(JOYSTICK_STEERING);
     delayMicroseconds(20);
-    leftBrakeVal = analogRead(LEFT_BRAKE);
-    delayMicroseconds(20);
-    rightBrakeVal = analogRead(RIGHT_BRAKE);
 
-    throttleVal = constrain(throttleVal, 512, 1023);
-    throttleVal = map(throttleVal, 512, 1023, 40, 60);
+
+    if (throttleReading > 500) 
+    {
+    throttleVal = map(throttleReading, 512, 1023, 40, 60);
+    brakeVal = 100;
+    } else if (throttleReading <= 500)
+    {
+      brakeVal = map(throttleReading, 0, 512, 0, 100);
+      throttleVal = 0;
+    }
 
     steeringVal = map(steeringVal, 0, 1023, 0, 100);
 
-    leftBrakeVal = map(leftBrakeVal, 0, 1023, 0, 100);
-    rightBrakeVal = map(rightBrakeVal, 0, 1023, 0, 100);
+    
 
-    SendNewMotorValues(throttleVal, steeringVal, leftBrakeVal, rightBrakeVal);
+    SendNewMotorValues(throttleVal, steeringVal, brakeVal);
     previousTime = millis();
   }
 }
 
 //****************************** SUBROUTINES ************************************
-void SendNewMotorValues(char thrust, char turn, char leftBrake, char rightBrake)
+void SendNewMotorValues(char thrust, char turn, char brake)
 {
   Serial.write (SERIAL_COMMAND_SET_THROTTLE_MOTOR);
   Serial.write (thrust);
@@ -98,9 +100,6 @@ void SendNewMotorValues(char thrust, char turn, char leftBrake, char rightBrake)
   Serial.write (SERIAL_COMMAND_SET_STEERING_MOTOR);
   Serial.write (turn);
 
-  Serial.write (SERIAL_COMMAND_SET_LEFT_BRAKE);
-  Serial.write (leftBrake);
-
-  Serial.write (SERIAL_COMMAND_SET_RIGHT_BRAKE);
-  Serial.write (rightBrake);
+  Serial.write (SERIAL_COMMAND_SET_BRAKE);
+  Serial.write (brake);
 }

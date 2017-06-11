@@ -1,24 +1,21 @@
 #include <Servo.h>
 
-Servo leftBrake;
-Servo rightBrake;
+Servo brake;
 Servo steering;
 Servo throttle;
 
-const int LEFT_BRAKE_MOTOR = 10;
-const int RIGHT_BRAKE_MOTOR = 8;
-const int THROTTLE_MOTOR = 7;  
-const int STEERING_SERVO = 6;
+const int BRAKE_MOTOR = 8;
+const int THROTTLE_MOTOR = 9;  
+const int STEERING_SERVO = 7;
 
 const int MOTOR_VALUE_OFF = 0;
 const int MOTOR_VALUE_MAX = 179;
 const int MOTOR_VALUE_CENTER = 90;
 
-const int NUMBER_OF_BYTES_IN_A_COMMAND = 8;
+const int NUMBER_OF_BYTES_IN_A_COMMAND = 6;
 const int SERIAL_COMMAND_SET_THROTTLE_MOTOR = 254;
 const int SERIAL_COMMAND_SET_STEERING_MOTOR = 255;
-const int SERIAL_COMMAND_SET_LEFT_BRAKE = 253;
-const int SERIAL_COMMAND_SET_RIGHT_BRAKE = 252;
+const int SERIAL_COMMAND_SET_BRAKE = 253;
 const int SERIAL_COMMAND_RECEIVED = 250;
 
 const long SERIAL_DATA_SPEED_9600_BPS = 9600;
@@ -30,11 +27,8 @@ void setup()
   previousTime = millis();
   Serial.begin(SERIAL_DATA_SPEED_9600_BPS);
 
-  leftBrake.attach (LEFT_BRAKE_MOTOR);
-  leftBrake.write(MOTOR_VALUE_OFF);
-
-  rightBrake.attach(RIGHT_BRAKE_MOTOR);
-  rightBrake.write(MOTOR_VALUE_OFF);
+  brake.attach(BRAKE_MOTOR);
+  brake.write(MOTOR_VALUE_OFF);
 
   throttle.attach(THROTTLE_MOTOR);
   throttle.write(MOTOR_VALUE_OFF);
@@ -45,8 +39,7 @@ void setup()
 
 void loop()
 {
-  static char rightBrakeVal = 0;
-  static char leftBrakeVal = 0;
+  static char brakeVal = 0;
   static char throttleVal = 0;
   static char steeringVal = 50;
 
@@ -54,15 +47,9 @@ void loop()
   {
     int incomingByte = Serial.read();
     
-    if (SERIAL_COMMAND_SET_LEFT_BRAKE == incomingByte)
+    if (SERIAL_COMMAND_SET_BRAKE == incomingByte)
     {
-      leftBrakeVal = Serial.read();
-      Serial.write(SERIAL_COMMAND_RECEIVED);
-      previousTime = millis();
-    }
-    else if (SERIAL_COMMAND_SET_RIGHT_BRAKE == incomingByte)
-    {
-      rightBrakeVal = Serial.read();
+      brakeVal = Serial.read();
       Serial.write(SERIAL_COMMAND_RECEIVED);
       previousTime = millis();
     }
@@ -84,13 +71,11 @@ void loop()
   if (millis() - previousTime >= MAX_TIMEOUT)
   {
     throttle.write(MOTOR_VALUE_OFF);
-    leftBrake.write(MOTOR_VALUE_MAX);
-    rightBrake.write(MOTOR_VALUE_MAX);
+    brake.write(MOTOR_VALUE_MAX);
     steering.write(MOTOR_VALUE_CENTER);
   }
 
-  leftBrake.write(map(leftBrakeVal, 0, 100, 0, 179));
-  rightBrake.write(map(rightBrakeVal, 0, 100, 0, 179));
+  brake.write(map(brakeVal, 0, 100, 0, 50));
   throttle.write(throttleVal);
-  steering.write(map(steeringVal, 0, 100, 130, 60));
+  steering.write(map(steeringVal, 0, 100, 125, 70));
 }
