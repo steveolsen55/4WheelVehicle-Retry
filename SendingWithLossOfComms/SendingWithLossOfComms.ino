@@ -10,9 +10,9 @@ const long SERIAL_DATA_SPEED_9600_BPS = 9600;
 const unsigned long MAX_TIMEOUT = 250;
 
 // Active Low LED's
-int POWER_LED = 2;          //Red
-int COMS_GOOD_LED = 13;       //Green
-int COMS_BAD_LED = 12;       //Red
+int POWER_LED = 7;          //Red
+int COMS_GOOD_LED = 8;       //Green
+int COMS_BAD_LED = 9;       //Red
 
 int JOYSTICK_STEERING = A2;
 int JOYSTICK_THROTTLE = A3;
@@ -74,7 +74,7 @@ void loop()
 
     if (throttleReading > 500) 
     {
-    throttleVal = map(throttleReading, 512, 1023, 40, 60);
+    throttleVal = map(throttleReading, 512, 1023, 0, 100);
     brakeVal = 100;
     } else if (throttleReading <= 500)
     {

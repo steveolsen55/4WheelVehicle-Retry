@@ -75,7 +75,7 @@ void loop()
     steering.write(MOTOR_VALUE_CENTER);
   }
 
-  brake.write(map(brakeVal, 0, 100, 0, 50));
-  throttle.write(throttleVal);
+  brake.write(map(brakeVal, 0, 100, 50, 0));
+  throttle.write(map(throttleVal, 0, 100, 40, 60));
   steering.write(map(steeringVal, 0, 100, 125, 70));
 }
